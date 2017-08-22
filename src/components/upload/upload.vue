@@ -5,6 +5,38 @@
     <div class="upload-wrap">
         <template>    
             <Form :model="result" :label-width="80">
+                <Form-item label="添加歌曲" class="u-add">
+                    <Upload 
+                        action="/file"
+                        :before-upload="beforeSrcUpload"
+                        @on-progress="progress">
+                        <Button type="ghost" icon="ios-cloud-upload-outline">选择要上传的音乐文件</Button>
+                    </Upload>
+                    <div v-if="result.src">待上传文件{{result.src.name}}</div>
+                </Form-item>
+                <Form-item label="上传封面" class="u-cover">
+                    <div class="selected-cover" v-if="image">
+                        <img :src="image" >
+                        <div class="vord-cover">
+                            <Icon type="ios-eye-outline" @click="isCoverShow = true"></Icon>
+                            <Icon type="ios-trash-outline" @click="isCoverShow = true"></Icon>
+                        </div>
+                    </div>
+                    <Upload
+                        ref="upload"
+                        :show-upload-list="false"
+                        :max-size="2048"
+                        :format="['jpg','jpeg','png']"
+                        :before-upload="beforeCoverUpload"
+                        type="drag"
+                        action="/file"
+                        style="display: inline-block;width:58px;">
+                        <div style="width: 58px;height:58px;line-height: 58px;">
+                            <Icon type="camera" size="20"></Icon>
+                        </div>
+                    </Upload>
+                </Form-item>
+               
                 <Form-item label="歌名">
                     <Input v-model="result.name" placeholder="请输入"></Input>
                 </Form-item>
@@ -37,39 +69,6 @@
                             </Card>
                         </Col>
                     </Row>
-                </Form-item>
-                <Form-item label="上传封面" class="u-cover">
-                    <div class="selected-cover" v-if="image">
-                        <img :src="image" >
-                        <div class="vord-cover">
-                            <Icon type="ios-eye-outline" @click="isCoverShow = true"></Icon>
-                            <Icon type="ios-trash-outline" @click="isCoverShow = true"></Icon>
-                        </div>
-                    </div>
-                    <Upload
-                        ref="upload"
-                        enctype="multipart/form-data"
-                        :headers="{enctype: 'multipart/form-data'}"
-                        :show-upload-list="false"
-                        :max-size="2048"
-                        :format="['jpg','jpeg','png']"
-                        :before-upload="beforeCoverUpload"
-                        type="drag"
-                        action="/file"
-                        style="display: inline-block;width:58px;">
-                        <div style="width: 58px;height:58px;line-height: 58px;">
-                            <Icon type="camera" size="20"></Icon>
-                        </div>
-                    </Upload>
-                </Form-item>
-                <Form-item label="添加歌曲" class="u-add">
-                    <Upload 
-                        action="/file"
-                        :before-upload="beforeSrcUpload"
-                        @on-progress="progress">
-                        <Button type="ghost" icon="ios-cloud-upload-outline">选择要上传的音乐文件</Button>
-                    </Upload>
-                    <div v-if="result.src">待上传文件{{result.src.name}}</div>
                 </Form-item>
                 <Form-item>
                     <Button type="info" long @click="formSubmit">确认上传</Button>
@@ -138,23 +137,95 @@
                 });
             },
             formSubmit() {
-                console.log(this.result);
+                var userId = sessionStorage.getItem('userInfo');
+                if (!userId) {
+                    this.$Notice.error({
+                        title: '对方不想说话！',
+                        desc: '请登录后再上传歌曲~'
+                    });
+                    return;
+                }
+                if (!this.result.src) {
+                    this.$Notice.error({
+                        title: '请完善信息填写~',
+                        desc: '必须上传一首歌曲~'
+                    });
+                    return;
+                }
+                if (!this.result.cover) {
+                    this.$Notice.error({
+                        title: '请完善信息填写~',
+                        desc: '必须上传一张封面~'
+                    });
+                    return;
+                }
+                if (!this.result.singer || !this.result.name) {
+                    this.$Notice.error({
+                        title: '请完善信息填写~',
+                        desc: '请填写歌曲信息~'
+                    });
+                    return;
+                }
+                if (this.result.tags.length === 0) {
+                    this.$Notice.error({
+                        title: '请完善信息填写~',
+                        desc: '至少为歌曲选择一个分类~'
+                    });
+                    return;
+                }
                 var formData = new FormData();
                 formData.append('name', this.result.name);
+                formData.append('uploader', userId);
                 formData.append('singer', this.result.singer);
                 formData.append('cover', this.result.cover);
                 formData.append('types', JSON.stringify(this.result.tags));
                 formData.append('src', this.result.src);
 
                 this.$http.post('/api/upload/song', formData).then(response => {
-                    console.log(response);
+                    if (response) {
+                        this.image = null;
+                        this.result = {
+                            name: '',   // 歌名
+                            singer: '', // 歌手
+                            cover: '',  // 封面
+                            tags: [],
+                            src: null
+                        }
+                        this.$Message.success({
+                            content: '上传成功！'
+                        });
+                    }
                 });
             },
             beforeSrcUpload(file) {
+                if (file.type !== 'audio/mp3') {
+                    this.$Notice.error({
+                        title: '请上传正确文件',
+                        desc: '目前只支持mp3音乐文件~',
+                        duration: 5
+                    });
+                    return false;
+                }
+                let _name = file.name;
+                if (_name.includes('-')) {
+                    let str = _name.split('-');
+                    if (str.length === 2) {
+                        this.result.singer = str[0].trim();
+                        this.result.name = str[1].trim().replace('.mp3', '');
+                    }
+                }
                 this.result.src = file;
                 return false;
             },
             beforeCoverUpload(file) {
+                if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+                    this.$Notice.error({
+                        title: '请上传正确文件',
+                        desc: '由于开发者很懒，未做各种图片的兼容问题，目前支持png/jpg/jpeg三种图片文件~',
+                        duration: 5
+                    });
+                    return false;
+                }
                 this.result.cover = file;
                 let url = window.URL.createObjectURL(file);
                 this.image = url;

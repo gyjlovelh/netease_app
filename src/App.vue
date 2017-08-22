@@ -13,6 +13,7 @@
 </template>
 
 <script>
+    import Vue from 'vue';
     import menu from './components/menu.vue';
     import play from './components/play.vue';
 
@@ -20,6 +21,12 @@
         components: {
             'app-menu': menu,
             'app-play': play
+        },
+        created() {
+            window._vueInstance = new Vue();
+            this.$http.get('/api/types').then(response => {
+                sessionStorage.setItem('songTypes', JSON.stringify(response.body.result));
+            });
         }
     }
 </script>

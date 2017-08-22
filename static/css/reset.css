@@ -112,3 +112,31 @@ body {
     padding: 0 45px;
     line-height: 30px;
 }
+.ivu-modal-header{
+    padding: 14px 16px 0 14px;
+}
+.ivu-modal-header p{
+    overflow: visible !important;
+}
+.ivu-modal-header .btn-io {
+    position: relative;
+    top: 3px;
+    border-radius: 0;
+}
+.ivu-modal-header .l-m-on {
+    color: #57a3f3;
+    border-bottom: 1px solid #57a3f3;
+}
+.ivu-modal-header .l-m-on:hover {
+    border-bottom: 1px solid #57a3f3;
+}
+
+
+.ivu-modal-footer {
+    border-top: 0 !important;
+    padding-top: 5px !important;
+}
+
+.ivu-input:hover{
+    box-shadow: 0 0 4px 1px rgba(45, 140, 240, 0.53) !important;
+}

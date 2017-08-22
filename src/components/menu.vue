@@ -20,7 +20,7 @@
                                     MV
                                 </Menu-item>
                             </router-link>
-                            <router-link to="/friend">
+                            <router-link to="/recommend/friends">
                                 <Menu-item name="0-3">
                                     <Icon class="m-icon" type="ios-people" :size="21"></Icon>
                                     朋友

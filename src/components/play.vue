@@ -12,8 +12,8 @@
                         </Col>
                         <Col span="8">
                             <div @click="playOrPause">
-                                <Icon v-if="paused" type="ios-play" color="white" size="30"></Icon>
-                                <Icon v-if="!paused" type="ios-pause" color="white" size="30"></Icon>
+                                <Icon v-if="playerInfo.paused" type="ios-play" color="white" size="30"></Icon>
+                                <Icon v-if="!playerInfo.paused" type="ios-pause" color="white" size="30"></Icon>
                             </div>
                         </Col>
                         <Col span="8">
@@ -23,25 +23,13 @@
                         </Col>
                     </Row>
                 </template>
-                <audio ref="audio" controls="controls" 
-                    style="position: fixed;left: 0; top: 0;z-index: -1;display: none;" 
-                    @timeupdate="timeupdate" 
-                    @progress="audioProgress"
-                    @loadstart="loadstart"
-                    @loadeddata="loadeddata"
-                    @loadedmetadata="loadedmetadata"
-                    @canplay="canplay">
-
-                    <source :src="cmusic.src" type="audio/mpeg">
-                    Your browser does not support the audio tag.
-                </audio>
             </div>
             <div class="m-vol">
                 <template>
-                    <Slider v-model="voice" @on-input="voiceChange" :tip-format="format"></Slider>
+                    <Slider v-model="playerInfo.voice" @on-input="voiceChange" :tip-format="format"></Slider>
                 </template>
             </div>
-            <div class="m-view">
+            <div class="m-view" v-if="cmusic">
                 <div class="m-l" style="display: inline-block;">
                      <img width="48" height="48" :src="cmusic.cover">
                 </div>
@@ -52,7 +40,7 @@
                         </div>
                         <div class="c-c">
                             <p class="m-name">{{cmusic.name}}</p>
-                            <p class="m-singer">{{cmusic.singer}}--雷子</p>
+                            <p class="m-singer">{{cmusic.singer}}</p>
                         </div>
                         <div class="c-r">
                             <Icon style="position: absolute;right: 0px;top: 0px" type="ios-shuffle-strong" size="20"></Icon>
@@ -64,37 +52,125 @@
                             <Slider v-model="progress" @on-change="progressChange" :tip-format="formatProgress"></Slider>
                         </template>
                     </div>
+                    <app-player :emit="emit" :playerInfo="playerInfo"></app-player>
                 </div>        
             </div>
             <div class="m-else">
+                <a class="current-list" @click="csListShow = !csListShow">
+                    <Icon type="ios-settings" :size="24"></Icon>
+                </a>
+                <Table v-show="csListShow" class="cs-list" highlight-row stripe 
+                    :columns="csColumns"
+                    @on-row-dblclick="selectSong"
+                    :data="currentSongList">
+                </Table>
                 <router-link to="/upload">
                     <Icon type="ios-cloud-upload-outline" :size="26" style="font-size: 26px;margin: 0px 13px;position: relative;top: 12px;"></Icon>
                 </router-link>
                 <a class="to-git" target="_blank" href="https://github.com/gyjlovelh/netease_app">
                     <Icon type="social-github" :size="26"></Icon>
                 </a> 
-                <!-- <a style="float: right;height: 48px;" href="javascript:;">
-                    <img style="border-radius: 99px;" width="24" height="24" :src="cmusic.cover">
-                </a>         -->
+                <Button v-if="cUser" type="text">{{cUser.username}}</Button>
+                <Button v-else type="text" @click="loginModal = true">登录</Button>
+                <Modal v-model="loginModal" width="360">
+                    <p slot="header">
+                        <Button class="btn-io" :class="{'l-m-on': loginOrRegister}" @click="loginOrRegister = true" type="text" size="large">登录</Button>
+                        <Button class="btn-io" :class="{'l-m-on': !loginOrRegister}" @click="loginOrRegister = false" type="text" size="large">注册</Button>
+                    </p>
+                    <Form :model="userInfo">
+                        <Form-item>
+                            <Input type="text" v-model="userInfo.username" placeholder="请输入账号">
+                                <Icon type="ios-person" :size="20" slot="prepend"></Icon> 
+                            </Input>
+                        </Form-item>
+                        <Form-item>
+                            <Input type="password" v-model="userInfo.password" placeholder="请输入密码">
+                                <Icon type="locked" :size="16" slot="prepend"></Icon> 
+                            </Input>
+                        </Form-item>
+                        <Form-item v-if="!loginOrRegister">
+                            <Input type="password" placeholder="请确认密码">
+                                <Icon type="locked" :size="16" slot="prepend"></Icon> 
+                            </Input>
+                        </Form-item>
+                    </Form>
+                    <p slot="footer">
+                        <Button v-if="loginOrRegister" type="info" long @click="login">登录</Button>
+                        <Button v-else type="info" long @click="register">注册</Button>
+                    </p>
+                </Modal>   
             </div>  
         </div>
     </div>
 </template>
 
 <script type="text/ecmascript-6">
+    import Vue from 'vue';
+    import player from './player/player.vue';
+    import isPlayBtn from './renders/isPlayBtn.vue';
+
     export default {
         data() {
             return {
-                paused: true,
-                voice: 59,
+                emit: new Vue(),
+                playerInfo: {
+                    paused: true,
+                    voice: 60,
+                    currentTime: 0,
+                    duration: 0,
+                    circleStyle: 0
+                },
                 progress: 0,
                 currentTime: 0,
                 duration: 0,
-                cmusic: {
-                    src: ''
+                cUser: null,
+                loginModal: false,
+                loginOrRegister: true,
+                userInfo: {
+                    username: '',
+                    password: ''
                 },
-                sList: []
+                csListShow: false,
+                csColumns: [
+                    {
+                        title: '#',
+                        width: 50,
+                        render(h, params) {
+                            return h(isPlayBtn, {
+                                props: {
+                                    row: params.row
+                                }
+                            })
+                        }
+                    },
+                    {
+                        title: '歌名',
+                        key: 'name',
+                        ellipsis: true
+                    },
+                    {
+                        title: '艺人',
+                        key: 'singer',
+                        ellipsis: true
+                    },
+                    {
+                        title: '时长',
+                        key: 'duration'
+                    }
+                ],
+                currentSongList: []
             }
+        },
+        components: {
+            'app-player': player
+        },
+        created() {
+            let cUserId = sessionStorage.getItem('userInfo') || null;
+            if (cUserId) {
+                this.$http.post('/api/findUserById', {id: cUserId}).then(response => {
+                    this.cUser = response.body.result;
+                });
+            };
         },
         mounted() {
             this.$http.get('/api/songs').then(response => {
@@ -102,12 +178,26 @@
                     item.cover = 'http://localhost:3000/' + item.cover.replace('public/', '');
                     item.src = 'http://localhost:3000/' + item.src.replace('public/', '');
                 });
-                this.sList = response.body.result;
-                this.cmusic = this.sList[0];
-                this.$refs['audio'].load();
+                this.currentSongList = response.body.result;
+                this.$store.commit('SELECT_SONG', this.currentSongList[0]);
+            });
+            this.emit.$on('progress', ctime => {
+                this.currentTime = ctime;
+                this.progress = this.currentTime / this.duration * 100;
+            });
+            this.emit.$on('loadSuccess', info => {
+                this.duration = info.duration;
+            });
+            this.emit.$on('ended', flag => {
+                if (flag) {
+                    this.prev();
+                }
             });
         },
         computed: {
+            cmusic() {
+                return this.$store.getters['cmusic'];
+            },
             currentTimes() {
                 let m = Math.floor(this.currentTime / 60);
                 let s = Math.floor(this.currentTime - m * 60);
@@ -127,87 +217,70 @@
             formatProgress(p) {
                 return '进度' + p + '%';
             },
+            selectSong(p) {
+                this.$store.commit('SELECT_SONG', p);
+            },
             /**
              *  @description 设置声音大小
              */
             voiceChange(v) {
-                this.$refs['audio'].volume = v / 100;
+                this.playerInfo.voice = v;
             },
             /**
-             *  @description 拖拽/点选进度
-             */
-            progressChange(p) {
-                this.$refs['audio'].currentTime = Math.floor(this.$refs['audio'].duration * p / 100);
-                this.progress = this.currentTime / this.duration * 100;
-            },
-            /**
-                @description 上一曲
-             */
+            * @description 上一曲
+            */
             prev() {
                 let _index = 0;
-                this.sList.forEach((item, index) => {
-                    if (item._id === this.cmusic._id) {
+                let _cmusic = this.$store.getters['cmusic'];
+                this.currentSongList.forEach((item, index) => {
+                    if (item._id === _cmusic._id) {
                         if (index === 0) {
-                            _index = this.sList.length - 1;
+                            _index = this.currentSongList.length - 1;
                         } else {
                             _index = index - 1;
                         }
                     }
                 });
-                this.cmusic = this.sList[_index];
-                this.$refs['audio'].load();
-                this.$refs['audio'].play();
+                this.$store.commit('SELECT_SONG', this.currentSongList[_index]);
             },
             /**
-                @description 播放/暂停
-             */
+            * @description 播放/暂停
+            */
             playOrPause() {
-                if (this.$refs['audio'].paused) {
-                    this.$refs['audio'].play();
-                } else {
-                    this.$refs['audio'].pause();
-                }
-                this.paused = this.$refs['audio'].paused;
+                this.playerInfo.paused = !this.playerInfo.paused;
             },
             /**
-                @description 下一曲
-             */
+            * @description 下一曲
+            */
             next() {
                 let _index = 0;
-                this.sList.forEach((item, index) => {
-                    if (item._id === this.cmusic._id) {
-                        _index = (index + 1) % this.sList.length;
+                let _cmusic = this.$store.getters['cmusic'];
+                this.currentSongList.forEach((item, index) => {
+                    if (item._id === _cmusic._id) {
+                        _index = (index + 1) % this.currentSongList.length;
                     }
                 });
-                this.cmusic = this.sList[_index];
-                this.$refs['audio'].load();
-                this.$refs['audio'].play();
+                this.$store.commit('SELECT_SONG', this.currentSongList[_index]);
             },
             /**
-                @description audio可以播放时
+             *  @description 拖拽/点选进度
              */
-            loadstart(e) {
-                console.log('loadstart ....', e)
+            progressChange(p) {
+                this.$store.commit('PROGRESS', Math.floor(this.duration * p / 100));
             },
-            loadeddata() {
-                console.log('loadeddata ....')
+            register() {
+                this.$http.post('/api/register', this.userInfo).then(response => {
+                    console.log(response);
+                    sessionStorage.setItem('userInfo', response.body.result._id);
+                });
             },
-            loadedmetadata() {
-                console.log('loadedmetadata ....')
-            },
-            canplay(e) {
-                console.log('...can play')
-                this.duration = Math.floor(e.target.duration);
-            },
-            audioProgress(e) {
-                console.log('progress...');
-            },
-            /**
-                @description 进度发生改变
-             */
-            timeupdate(e) {
-                this.currentTime = Math.floor(e.target.currentTime);
-                this.progress = this.currentTime / this.duration * 100;
+            login() {
+                this.$http.post('/api/login', this.userInfo).then(response => {
+                    if (response.body.result) {
+                        this.cUser = response.body.result;
+                        sessionStorage.setItem('userInfo', response.body.result._id);
+                    }
+                });
             }
         }
     }
@@ -295,6 +368,7 @@
                             top -16px
             .m-else
                 width 27%
+                position relative
                 .to-git
                     display inline-block
                     line-height 48px
@@ -303,7 +377,24 @@
                     float right 
                     .ivu-icon
                         position relative
-                        top 10px    
+                        top 10px 
+                .current-list
+                    display inline-block
+                    line-height 48px
+                    text-align center
+                    width: 30px
+                    float left        
+                    .ivu-icon
+                        position relative
+                        top 10px 
+                .cs-list
+                    position absolute
+                    top 50px
+                    right 0
+                    width 400px
+                    max-height 492px
+                    overflow-y scroll
+                    border 1px solid #ccc
 
 </style>
 
