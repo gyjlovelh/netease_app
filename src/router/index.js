@@ -1,10 +1,13 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-import playlist from '../components/playlist.vue';
-import album from '../components/album/album.vue';
-import upload from '../components/upload/upload.vue';
-import uploads from '../components/uploads/uploads.vue';
+/** upload */
+import uploadSong from '../components/upload/song.vue';
+import tunnel from '../components/upload/tunnel.vue';
+import uploadMv from '../components/upload/mv.vue';
+/** my */
+import uploads from '../components/my/uploads/uploads.vue';
+import myMvs from '../components/my/mv/mv.vue';
 /** recommend */
 import rfind from '../components/recommend/find/find.vue';
 import rmv from '../components/recommend/mv/mv.vue';
@@ -29,33 +32,29 @@ export default new Router({
             component: rfriends
         },
         {
-            path: '/my',
-            component: uploads,
+            path: '/my/uploads',
+            component: uploads
+        },
+        {
+            path: '/my/mv',
+            component: myMvs
+        },
+        {
+            path: '/upload',
+            component: tunnel,
             children: [
                 {
-                    path: 'uploads',
-                    component: uploads
-                },
-                {
-                    path: 'article',
-                    component: playlist
+                    path: 'song',
+                    component: uploadSong
                 },
                 {
                     path: 'mv',
-                    component: album
-                },
-                {
-                    path: 'types',
-                    component: album
+                    component: uploadMv
                 }
             ]
         },
         {
-            path: '/upload',
-            component: upload
-        },
-        {
-            path: '/mv',
+            path: '/mv/:id',
             component: mv
         }
     ]

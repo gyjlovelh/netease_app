@@ -1,13 +1,22 @@
 <template>
     <div>
-        <video controls width="800">
-            <source src="./J.Fla - Wake Me Up (cover by J.Fla).mp4" type="video/mp4">
+        <video v-if="src" controls width="800">
+            <source :src="srces" type="video/mp4">
         </video>
     </div>
 </template>
 
 <script>
-export default {}
+export default {
+    props: ['src'],
+    computed: {
+        srces() {
+            let _src = ('http://localhost:3000' + this.src).replace('public', '');
+            console.log(_src);
+            return _src;
+        }
+    }
+}
 </script>
 
 <style lang="stylus" scoped>

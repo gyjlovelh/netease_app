@@ -31,21 +31,21 @@
                             <router-link to="/my/uploads">
                                 <Menu-item name="1-1">
                                     <Icon class="m-icon" type="ios-cloud-upload" :size="20"></Icon>
-                                    我的上传
+                                    我上传的音乐
                                 </Menu-item>
                             </router-link>
+                            <router-link to="/my/mv">
+                                <Menu-item name="1-3">
+                                    <Icon class="m-icon" type="social-youtube-outline" :size="17"></Icon>
+                                    我上传的MV
+                                </Menu-item>
+                            </router-link>  
                             <router-link to="/my/article">
                                 <Menu-item name="1-2">
                                     <Icon class="m-icon" type="android-contact" :size="20"></Icon>
                                     艺人
                                 </Menu-item>
                             </router-link>
-                            <router-link to="/my/mv">
-                                <Menu-item name="1-3">
-                                    <Icon class="m-icon" type="social-youtube-outline" :size="17"></Icon>
-                                    我的MV
-                                </Menu-item>
-                            </router-link>  
                             <router-link to="/my/types">
                                 <Menu-item name="1-4">
                                     <Icon class="m-icon" type="social-pinterest-outline" :size="18"></Icon>
@@ -62,7 +62,7 @@
                         <Submenu name="2">
                             <template slot="title">
                                 创建的歌单
-                                <Button class="create-playlist" type="ghost" shape="circle" icon="plus-round" size="small"></Button>
+                                <Button class="create-playlist" @click="createPlayList" type="ghost" shape="circle" icon="plus-round" size="small"></Button>
                             </template>
                             <router-link to="/my/playlist/favorite">
                                 <Menu-item name="2-1">
@@ -108,7 +108,25 @@
 </template>
 
 <script type="text/ecmascript-6">
-    export default {}
+    export default {
+        methods: {
+            /**
+             * 创建歌单
+             */
+            'createPlayList'() {
+                this.$Modal.info({
+                    title: '新建歌单',
+                    render(h, params) {
+                        return h('Input', {
+                            props: {
+                                data: params
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
