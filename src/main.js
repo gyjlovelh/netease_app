@@ -10,6 +10,7 @@ import router from './router';
 import iview from 'iview';
 
 import 'iview/dist/styles/iview.css';
+import 'animate.css';
 
 Vue.config.productionTip = false;
 

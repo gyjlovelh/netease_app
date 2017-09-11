@@ -3,10 +3,10 @@
  */
 <template>
     <div class="upload-wrap">
-        <template>    
+        <template>
             <Form :model="result" :label-width="80">
                 <Form-item label="添加歌曲" class="u-add">
-                    <Upload 
+                    <Upload
                         action="/file"
                         :before-upload="beforeSrcUpload"
                         @on-progress="progress">
@@ -36,7 +36,7 @@
                         </div>
                     </Upload>
                 </Form-item>
-               
+
                 <Form-item label="歌名">
                     <Input v-model="result.name" placeholder="请输入"></Input>
                 </Form-item>
@@ -54,17 +54,17 @@
                                         <Icon :type="type.cls"></Icon>{{type.name}}
                                     </p>
                                     <div class="tags">
-                                        <Button class="tag" 
+                                        <Button class="tag"
                                             :key="tag.id"
-                                            :class="{'tag-on': result.tags.includes(tag.id)}" 
-                                            @click="selectTag(tag.id)" 
-                                            v-for="tag in type.tags" 
-                                            type="ghost" 
+                                            :class="{'tag-on': result.tags.includes(tag.id)}"
+                                            @click="selectTag(tag.id)"
+                                            v-for="tag in type.tags"
+                                            type="ghost"
                                             :size="'small'">
 
                                             {{tag.name}}
                                         </Button>
-                                    </div>  
+                                    </div>
                                 </div>
                             </Card>
                         </Col>
@@ -79,8 +79,8 @@
             <Modal title="查看图片" v-show="isCoverShow">
                 <img :src="image">
             </Modal>
-        </template> 
-    </div>                  
+        </template>
+    </div>
 </template>
 
 <script type="text/ecmascript-6">
@@ -173,7 +173,7 @@
                     });
                     return;
                 }
-                var formData = new FormData();
+                let formData = new FormData();
                 formData.append('name', this.result.name);
                 formData.append('uploader', userId);
                 formData.append('singer', this.result.singer);
@@ -244,18 +244,18 @@
         min-width 500px
         margin 30px auto
         .u-cover, .u-add
-            text-align left  
+            text-align left
         .types
             color #999
             .ivu-icon
                 font-size 14px
-                margin-right 5px 
+                margin-right 5px
         .tags
-            padding-left 30px           
+            padding-left 30px
             .tag
                 margin 0 5px
             .tag-on
-                color red    
+                color red
         .selected-cover
             border: 1px solid #ccc;
             background #fff
@@ -264,13 +264,13 @@
             position relative
             float: left;
             margin-right: 20px;
-            height: 52px;   
+            height: 52px;
             width: 52px;
             img
-                border none 
+                border none
                 display block
                 height 48px
-                width 48px 
+                width 48px
                 position relative
                 left 1px
                 top 1px
@@ -289,6 +289,6 @@
                     cursor pointer
                     font-size 20px
             &:hover
-                .vord-cover 
-                    display block   
+                .vord-cover
+                    display block
 </style>

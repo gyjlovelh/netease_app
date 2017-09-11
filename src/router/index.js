@@ -8,12 +8,26 @@ import uploadMv from '../components/upload/mv.vue';
 /** my */
 import uploads from '../components/my/uploads/uploads.vue';
 import myMvs from '../components/my/mv/mv.vue';
+import edit from '../components/playlist/edit.vue';
 /** recommend */
 import rfind from '../components/recommend/find/find.vue';
 import rmv from '../components/recommend/mv/mv.vue';
 import rfriends from '../components/recommend/friends/friends.vue';
 
 import mv from '../components/mv/mv.vue';
+
+/**
+ * playlist
+ */
+import playlist from '../components/playlist/playlist.vue';
+
+/**
+ * user
+ */
+import home from '../components/user/home.vue';
+import follows from '../components/user/follows.vue';
+import fans from '../components/user/fans.vue';
+import setting from '../components/user/setting.vue';
 
 Vue.use(Router);
 
@@ -36,6 +50,10 @@ export default new Router({
             component: uploads
         },
         {
+            path: '/my/music/edit/:id',
+            component: edit
+        },
+        {
             path: '/my/mv',
             component: myMvs
         },
@@ -56,6 +74,30 @@ export default new Router({
         {
             path: '/mv/:id',
             component: mv
+        },
+        {
+            path: '/playlist/:id',
+            component: playlist
+        },
+        {
+            path: '/my/playlist/:id',
+            component: playlist
+        },
+        {
+            path: '/user/home/:id',
+            component: home
+        },
+        {
+            path: '/user/follows/:id',
+            component: follows
+        },
+        {
+            path: '/user/fans/:id',
+            component: fans
+        },
+        {
+            path: '/user/setting',
+            component: setting
         }
     ]
 });

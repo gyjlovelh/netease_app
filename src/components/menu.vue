@@ -12,12 +12,6 @@
                                 <Menu-item name="0-1">
                                     <Icon class="m-icon" type="ios-musical-notes" :size="20"></Icon>
                                     发现音乐
-                                </Menu-item> 
-                            </router-link>
-                            <router-link to="/recommend/mv">
-                                <Menu-item name="0-2">
-                                    <Icon class="m-icon" type="social-youtube-outline" :size="17"></Icon>
-                                    MV
                                 </Menu-item>
                             </router-link>
                             <router-link to="/recommend/friends">
@@ -39,7 +33,7 @@
                                     <Icon class="m-icon" type="social-youtube-outline" :size="17"></Icon>
                                     我上传的MV
                                 </Menu-item>
-                            </router-link>  
+                            </router-link>
                             <router-link to="/my/article">
                                 <Menu-item name="1-2">
                                     <Icon class="m-icon" type="android-contact" :size="20"></Icon>
@@ -62,18 +56,18 @@
                         <Submenu name="2">
                             <template slot="title">
                                 创建的歌单
-                                <Button class="create-playlist" @click="createPlayList" type="ghost" shape="circle" icon="plus-round" size="small"></Button>
+                                <Button class="create-playlist" @click.stop="createPlayList" type="ghost" shape="circle" icon="plus-round" size="small"></Button>
                             </template>
-                            <router-link to="/my/playlist/favorite">
-                                <Menu-item name="2-1">
-                                    <Icon class="m-icon" type="android-favorite" :size="18"></Icon>
-                                    我的最爱
-                                </Menu-item>
-                            </router-link>
-                            <router-link to="/my/playlist?id=345423">
-                                <Menu-item name="2-2">
-                                    <Icon class="m-icon" type="headphone" :size="18"></Icon>
-                                    代码资源
+                            <!--<router-link to="/my/playlist/favorite">-->
+                                <!--<Menu-item name="2-1">-->
+                                    <!--<Icon class="m-icon" type="android-favorite" :size="18"></Icon>-->
+                                    <!--我的最爱-->
+                                <!--</Menu-item>-->
+                            <!--</router-link>-->
+                            <router-link v-for="(gd, index) in createGDs" :to="'/my/playlist/' + gd._id">
+                                <Menu-item :name="'2-' + (index + 2)">
+                                    <Icon class="m-icon" :type="gd.name === '我的最爱'? 'android-favorite': 'headphone'" :size="18"></Icon>
+                                    {{gd.name}}
                                 </Menu-item>
                             </router-link>
                         </Submenu>
@@ -98,32 +92,69 @@
                                     <Icon class="m-icon" type="headphone" :size="18"></Icon>
                                     电影原音
                                 </Menu-item>
-                            </router-link>  
+                            </router-link>
                         </Submenu>
                     </Menu>
                 </Col>
             </Row>
         </template>
+
+        <Modal v-model="isCreateGDShow" :mask-closable="false">
+            <p slot="header" class="m-header">
+                <Icon type="social-pinterest"></Icon>
+                新建歌单
+            </p>
+            <div>
+                <Input style="margin-top: 10px" v-model="gdname">
+                    <span slot="prepend">歌单名：</span>
+                </Input>
+                <p style="margin-top: 10px;font-size: 12px">可通过"收藏"将音乐添加到新歌单中</p>
+            </div>
+            <div slot="footer" style="text-align: left;margin-top: 20px">
+                <Button @click="createGeDan" style="width: 70px;" type="info">创建</Button>
+                <Button @click="cancelMethod" style="width: 70px;" type="ghost">取消</Button>
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script type="text/ecmascript-6">
     export default {
+        data() {
+            return {
+                isCreateGDShow: false,
+                gdname: '',
+                createGDs: []
+            }
+        },
+        created() {
+            this.$http.get('/api/findGDByUserId?id=' + sessionStorage.getItem('userInfo')).then(response => {
+                this.createGDs = response.body.result;
+            });
+        },
         methods: {
             /**
              * 创建歌单
              */
             'createPlayList'() {
-                this.$Modal.info({
-                    title: '新建歌单',
-                    render(h, params) {
-                        return h('Input', {
-                            props: {
-                                data: params
-                            }
-                        });
-                    }
-                });
+                this.isCreateGDShow = true;
+            },
+            'createGeDan'() {
+                let userId = sessionStorage.getItem('userInfo');
+                if (this.gdname) {
+                    this.$http.post('/api/createGeDan', {creator: userId, name: this.gdname}).then(response => {
+                        if (response.body.result) {
+                            this.createGDs = response.body.result;
+                            this.isCreateGDShow = false;
+                        }
+                    });
+                } else {
+                    this.$Message.error()
+                }
+            },
+            'cancelMethod'() {
+                this.gdname = '';
+                this.isCreateGDShow = false;
             }
         }
     }
@@ -144,5 +175,7 @@
             height: 19px;
             font-size: 12px;
             color: #999;
-            margin-left: 10px;    
+            margin-left: 10px;
+
+
 </style>

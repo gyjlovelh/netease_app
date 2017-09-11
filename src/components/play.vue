@@ -47,19 +47,19 @@
                             <span>{{surpluses}}</span>
                         </div>
                     </div>
-                    <div class="progress-bar">       
+                    <div class="progress-bar">
                         <template>
                             <Slider v-model="progress" @on-change="progressChange" :tip-format="formatProgress"></Slider>
                         </template>
                     </div>
                     <app-player :emit="emit" :playerInfo="playerInfo"></app-player>
-                </div>        
+                </div>
             </div>
             <div class="m-else">
                 <a class="current-list" @click="csListShow = !csListShow">
                     <Icon type="ios-settings" :size="24"></Icon>
                 </a>
-                <Table v-show="csListShow" class="cs-list" highlight-row stripe 
+                <Table v-show="csListShow" class="cs-list" highlight-row stripe
                     :columns="csColumns"
                     @on-row-dblclick="selectSong"
                     :data="currentSongList">
@@ -69,9 +69,21 @@
                 </router-link>
                 <a class="to-git" target="_blank" href="https://github.com/gyjlovelh/netease_app">
                     <Icon type="social-github" :size="26"></Icon>
-                </a> 
-                <Button v-if="cUser" type="text">{{cUser.username}}</Button>
-                <Button v-else type="text" @click="loginModal = true">登录</Button>
+                </a>
+                <Button v-if="cUser" type="text" @click="loginModal = false">
+                    <Dropdown @on-click="drop">
+                        <a href="javascript:void(0);">
+                            <img :src="cUser.cover" width="36" height="36" class="c-user-cover">
+                            <Icon type="arrow-down-b"></Icon>
+                        </a>
+                        <DropdownMenu slot="list">
+                            <DropdownItem name="home"><a ><Icon style="margin-right: 5px;" size="18" type="ios-person"></Icon>我的主页</a></DropdownItem>
+                            <DropdownItem name="setting"><Icon style="margin-right: 5px;" size="16" type="ios-gear"></Icon>个人设置</DropdownItem>
+                            <DropdownItem name="signout"><Icon style="margin-right: 5px;" size="14" type="power"></Icon>退出登录</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </Button>
+                <Button v-if="!cUser" type="text" @click="loginModal = true">登录</Button>
                 <Modal v-model="loginModal" width="360">
                     <p slot="header">
                         <Button class="btn-io" :class="{'l-m-on': loginOrRegister}" @click="loginOrRegister = true" type="text" size="large">登录</Button>
@@ -80,17 +92,17 @@
                     <Form :model="userInfo">
                         <Form-item>
                             <Input type="text" v-model="userInfo.username" placeholder="请输入账号">
-                                <Icon type="ios-person" :size="20" slot="prepend"></Icon> 
+                                <Icon type="ios-person" :size="20" slot="prepend"></Icon>
                             </Input>
                         </Form-item>
                         <Form-item>
                             <Input type="password" v-model="userInfo.password" placeholder="请输入密码">
-                                <Icon type="locked" :size="16" slot="prepend"></Icon> 
+                                <Icon type="locked" :size="16" slot="prepend"></Icon>
                             </Input>
                         </Form-item>
                         <Form-item v-if="!loginOrRegister">
                             <Input type="password" placeholder="请确认密码">
-                                <Icon type="locked" :size="16" slot="prepend"></Icon> 
+                                <Icon type="locked" :size="16" slot="prepend"></Icon>
                             </Input>
                         </Form-item>
                     </Form>
@@ -98,8 +110,8 @@
                         <Button v-if="loginOrRegister" type="info" long @click="login">登录</Button>
                         <Button v-else type="info" long @click="register">注册</Button>
                     </p>
-                </Modal>   
-            </div>  
+                </Modal>
+            </div>
         </div>
     </div>
 </template>
@@ -169,6 +181,8 @@
             if (cUserId) {
                 this.$http.post('/api/findUserById', {id: cUserId}).then(response => {
                     this.cUser = response.body.result;
+                    this.cUser.cover = 'http://localhost:3000' + response.body.result.cover.replace('public', '');
+                    console.log('cUser', this.cUser);
                 });
             };
         },
@@ -211,6 +225,18 @@
             }
         },
         methods: {
+            drop(p) {
+                if (p === 'home') {
+                    this.$router.push('/user/home/1234');
+                } else if (p === 'setting') {
+                    this.$router.push('/user/setting');
+                } else {
+                    // 退出登录
+                    sessionStorage.removeItem('userInfo');
+                    this.cUser = null;
+                    this.$router.push('/recommend/find');
+                }
+            },
             format(v) {
                 return '声音' + v + '%';
             },
@@ -278,6 +304,7 @@
                 this.$http.post('/api/login', this.userInfo).then(response => {
                     if (response.body.result) {
                         this.cUser = response.body.result;
+                        this.loginModal = false;
                         sessionStorage.setItem('userInfo', response.body.result._id);
                     }
                 });
@@ -318,9 +345,9 @@
                     cursor pointer
                     .ivu-icon
                         display block
-                        margin 12px 0    
+                        margin 12px 0
                     .ivu-icon-ios-play
-                        margin 9px 0    
+                        margin 9px 0
             .m-vol
                 width 10%
                 margin 6px 0
@@ -334,7 +361,7 @@
                     height 48px
                 .m-r
                     width 100%
-                    height 48px 
+                    height 48px
                     .content
                         height 44px
                         width 100%
@@ -352,14 +379,14 @@
                                 line-height 22px
                                 height 22px
                             .m-name
-                                color #444   
-                                font-size 14px 
+                                color #444
+                                font-size 14px
                             .m-singer
                                 font-size 12px
                         .c-r
                             position relative
                             text-align right
-                            width 20%     
+                            width 20%
                     .progress-bar
                         height 4px
                         width 100%
@@ -374,19 +401,19 @@
                     line-height 48px
                     text-align center
                     width: 30px
-                    float right 
+                    float right
                     .ivu-icon
                         position relative
-                        top 10px 
+                        top 10px
                 .current-list
                     display inline-block
                     line-height 48px
                     text-align center
                     width: 30px
-                    float left        
+                    float left
                     .ivu-icon
                         position relative
-                        top 10px 
+                        top 10px
                 .cs-list
                     position absolute
                     top 50px
@@ -395,6 +422,9 @@
                     max-height 492px
                     overflow-y scroll
                     border 1px solid #ccc
+                .c-user-cover
+                    border 1px solid #ccc
+                    border-radius 99px
 
 </style>
 
