@@ -94,6 +94,23 @@
                                 </Menu-item>
                             </router-link>
                         </Submenu>
+                        <Submenu name="4">
+                            <template slot="title">
+                                杂七杂八
+                            </template>
+                            <router-link to="/my/playlist?id=287677">
+                                <Menu-item name="4-1">
+                                    <Icon class="m-icon" type="headphone" :size="18"></Icon>
+                                    俄罗斯方块
+                                </Menu-item>
+                            </router-link>
+                            <router-link to="/other/floor">
+                                <Menu-item name="4-2">
+                                    <Icon class="m-icon" type="headphone" :size="18"></Icon>
+                                    拖拽绘图
+                                </Menu-item>
+                            </router-link>
+                        </Submenu>
                     </Menu>
                 </Col>
             </Row>

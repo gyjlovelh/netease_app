@@ -19,6 +19,7 @@
 
 <script>
 import uploaderRender from './renders/uploaderRender.vue';
+import btns from './renders/btns.vue';
 import gdList from '../../common/gdList.vue';
 export default {
     data() {
@@ -54,6 +55,17 @@ export default {
                 {
                     title: '上传时间',
                     key: 'createtime'
+                },
+                {
+                    title: '操作',
+                    width: 100,
+                    render(h, params) {
+                        return h(btns, {
+                            props: {
+                                params: params.row
+                            }
+                        });
+                    }
                 }
             ],
             mvs: [],

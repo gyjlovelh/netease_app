@@ -64,12 +64,6 @@
                     @on-row-dblclick="selectSong"
                     :data="currentSongList">
                 </Table>
-                <router-link to="/upload">
-                    <Icon type="ios-cloud-upload-outline" :size="26" style="font-size: 26px;margin: 0px 13px;position: relative;top: 12px;"></Icon>
-                </router-link>
-                <a class="to-git" target="_blank" href="https://github.com/gyjlovelh/netease_app">
-                    <Icon type="social-github" :size="26"></Icon>
-                </a>
                 <Button v-if="cUser" type="text" @click="loginModal = false">
                     <Dropdown @on-click="drop">
                         <a href="javascript:void(0);">

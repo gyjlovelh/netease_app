@@ -29,6 +29,16 @@ import follows from '../components/user/follows.vue';
 import fans from '../components/user/fans.vue';
 import setting from '../components/user/setting.vue';
 
+/**
+ * chat
+ */
+import chat from '../components/chat/chat.vue';
+
+/**
+ * 其他
+ */
+import floor from '../components/other/drag/floor.vue';
+import room from '../components/other/drag/room.vue';
 Vue.use(Router);
 
 export default new Router({
@@ -98,6 +108,18 @@ export default new Router({
         {
             path: '/user/setting',
             component: setting
+        },
+        {
+            path: '/chat',
+            component: chat
+        },
+        {
+            path: '/other/floor',
+            component: floor
+        },
+        {
+            path: '/other/room/:id',
+            component: room
         }
     ]
 });

@@ -13,7 +13,7 @@
                 </p>
                 <p class="pd-10">
                     <Button icon="social-youtube-outline" type="primary">播放全部</Button>
-                    <Button disabled="gdInfo.creator._id === userId" icon="ios-briefcase-outline" type="ghost">收藏歌单(234)</Button>
+                    <Button :disabled="gdInfo.creator._id === userId" icon="ios-briefcase-outline" type="ghost">收藏歌单(234)</Button>
                 </p>
                 <p class="pd-10" v-if="gdInfo.label.length > 0">标签：
                     <Tag v-for="label in gdInfo.label">{{label}}</Tag>
@@ -48,7 +48,22 @@
                     },
                     {
                         title: '上传者',
-                        key: 'uploader'
+                        render(h, params) {
+                            return h(
+                                'a',
+                                {
+                                    'class': {
+                                        upl: true
+                                    },
+                                    on: {
+                                        click(e) {
+                                            console.log(e);
+                                        }
+                                    }
+                                },
+                                params.row.uploader.nickname
+                            );
+                        }
                     }
                 ],
                 data: [],
@@ -112,6 +127,10 @@
             margin-top 80px
             h2
                 font-size 18px
+
+    .upl
+        &:hover
+            text-decoration underline
 </style>
 
 
